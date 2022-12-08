@@ -39,7 +39,7 @@ export default () => {
           </div>
           <div
             className="flex border border-gray-400 cursor-grab justify-center items-center p-2 rounded"
-            onDragStart={(event) => onDragStart(event, "frage")}
+            onDragStart={(event) => onDragStart(event, "question")}
             draggable
           >
             Frage Node

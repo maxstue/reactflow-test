@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import ReactFlow, {
   useNodesState,
   useEdgesState,
@@ -16,9 +16,12 @@ import ReactFlow, {
   OnConnectStartParams,
   FitViewOptions,
   Node,
+  useStore,
 } from "reactflow";
 import { WorkflowDataTypes } from "./constants";
+import QuestionNode from "./QuestionNode";
 import Sidebar from "./Sidebar";
+import SnapGridButton from "./SnapGridButton";
 
 const getId = () => `dndnode_${nanoid()}`;
 
@@ -35,7 +38,7 @@ const initialEdges: Edge[] = [];
 
 const flowTypeToApptype: Record<WorkflowDataTypes, string> = {
   input: "input",
-  frage: "default",
+  question: "question",
   antwort: "default",
   link: "output",
   lösung: "output",
@@ -45,9 +48,14 @@ const fitViewOptions: FitViewOptions = {
   padding: 3,
 };
 
+const customNodeTypes = {
+  question: QuestionNode,
+};
+
 export function Flow() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const connectingNodeId = useRef<string | null>(null);
+  const [snapGrid, setSnapGrid] = useState(false);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { project } = useReactFlow();
@@ -60,14 +68,9 @@ export function Flow() {
   const onConnectStart = useCallback(
     (
       _: React.MouseEvent<Element, MouseEvent>,
-      { nodeId, handleId, handleType }: OnConnectStartParams
+      { nodeId }: OnConnectStartParams
     ) => {
-      if (nodeId && handleType == "source") {
-        connectingNodeId.current = nodeId;
-      } else {
-        connectingNodeId.current = null;
-        console.log("Error: falscher source handleType: ", handleType);
-      }
+      connectingNodeId.current = nodeId;
     },
     []
   );
@@ -152,8 +155,11 @@ export function Flow() {
     [project]
   );
 
-  // TODO make custom 2 btn toggle snapgrid https://reactflow.dev/docs/examples/nodes/custom-node/
-  // TODO minimap show colors https://reactflow.dev/docs/examples/nodes/custom-node/
+  const onMiniMapNodeClick = () => {
+    // TODO zoom into view
+    console.log("click");
+  };
+
   // TODO add save and restore and reset
   // TODO workflowbuilder
   // TODO horizontal /vertical flow toggle
@@ -165,6 +171,7 @@ export function Flow() {
         <ReactFlow
           nodes={nodes}
           edges={edges}
+          nodeTypes={customNodeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
@@ -172,21 +179,37 @@ export function Flow() {
           onDragOver={onDragOver}
           onConnectStart={onConnectStart}
           onConnectEnd={onConnectEnd}
+          snapToGrid={snapGrid}
           fitView
           fitViewOptions={fitViewOptions}
         >
-          <MiniMap zoomable pannable />
+          <MiniMap
+            zoomable
+            pannable
+            nodeStrokeColor={(n) => {
+              if (n.type === "input") return "#475569";
+              if (n.type === "default") return "#94a3b8";
+              if (n.type === "output") return "#4ade80";
+              return "";
+            }}
+            nodeColor={(n) => {
+              if (n.type === "input") return "#475569";
+              if (n.type === "default") return "#94a3b8";
+              if (n.type === "output") return "#4ade80";
+              return "";
+            }}
+            onNodeClick={onMiniMapNodeClick}
+          />
           <Controls>
             <ControlButton onClick={() => console.log("action")}>
               <div>1</div>
             </ControlButton>
-            <ControlButton onClick={() => console.log("another action")}>
-              <div>2</div>
-            </ControlButton>
           </Controls>
           <Background />
           <Panel position="top-left" className="!m-0">
-            <div className="bg-dbCoolGray-300 p-4">top-left</div>
+            <div className="bg-white border border-b-black border-r-black p-4">
+              <SnapGridButton setSnapGrid={setSnapGrid} />
+            </div>
           </Panel>
           <Panel position="top-center">top-center</Panel>
           <Panel position="top-right">top-right</Panel>

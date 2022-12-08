@@ -45,9 +45,25 @@
 .react-flow__node-output.selected {
   @apply !border-2 !border-green-400 !shadow !shadow-green-400;
 }
+.react-flow__node-question.selected {
+  @apply !border-2 !border-red-400 !shadow !shadow-red-600;
+}
 
 .react-flow .react-flow__edge path,
 .react-flow__connectionline path {
   stroke-width: 2;
   top: 20px;
+}
+/* Default reactflow node styling */
+.react-flow__node-question {
+  padding: 10px;
+  border-radius: 3px;
+  width: 150px;
+  font-size: 12px;
+  color: #222;
+  text-align: center;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #1a192b;
+  background-color: white;
 }
