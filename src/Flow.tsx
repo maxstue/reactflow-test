@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import { useCallback, useRef } from "react";
 import ReactFlow, {
   useNodesState,
@@ -12,20 +13,25 @@ import ReactFlow, {
   Panel,
   useReactFlow,
   XYPosition,
+  OnConnectStartParams,
+  FitViewOptions,
+  Node,
 } from "reactflow";
 import { WorkflowDataTypes } from "./constants";
 import Sidebar from "./Sidebar";
 
-const initialNodes = [
-  { id: "1", position: { x: 100, y: 10 }, data: { label: "1" } },
-  { id: "2", position: { x: 0, y: 100 }, data: { label: "2" } },
-  { id: "3", position: { x: 0, y: 200 }, data: { label: "3" } },
+const getId = () => `dndnode_${nanoid()}`;
+
+const initialNodes: Node[] = [
+  {
+    id: getId(),
+    type: "input",
+    position: { x: 100, y: 10 },
+    data: { label: "Start" },
+  },
 ];
 
-const initialEdges = [{ id: "e1-2", source: "1", target: "2" }];
-
-let id = 0;
-const getId = () => `dndnode_${id++}`;
+const initialEdges: Edge[] = [];
 
 const flowTypeToApptype: Record<WorkflowDataTypes, string> = {
   input: "input",
@@ -35,19 +41,72 @@ const flowTypeToApptype: Record<WorkflowDataTypes, string> = {
   lösung: "output",
 };
 
+const fitViewOptions: FitViewOptions = {
+  padding: 3,
+};
+
 export function Flow() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const connectingNodeId = useRef<string | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const reactFlowInstance = useReactFlow();
+  const { project } = useReactFlow();
 
   const onConnect = useCallback(
-    (params: Edge | Connection) => {
-      console.log(params);
+    (params: Edge | Connection) => setEdges((els) => addEdge(params, els)),
+    []
+  );
 
-      return setEdges((els) => addEdge(params, els));
+  const onConnectStart = useCallback(
+    (
+      _: React.MouseEvent<Element, MouseEvent>,
+      { nodeId, handleId, handleType }: OnConnectStartParams
+    ) => {
+      if (nodeId && handleType == "source") {
+        connectingNodeId.current = nodeId;
+      } else {
+        connectingNodeId.current = null;
+        console.log("Error: falscher source handleType: ", handleType);
+      }
     },
-    [setEdges]
+    []
+  );
+
+  const onConnectEnd = useCallback(
+    (event: MouseEvent) => {
+      const targetIsPane = (event.target as Element)?.classList.contains(
+        "react-flow__pane"
+      );
+
+      if (targetIsPane && reactFlowWrapper.current) {
+        // we need to remove the wrapper bounds, in order to get the correct position
+        const { top, left } = reactFlowWrapper.current.getBoundingClientRect();
+        const id = getId();
+        const newNode = {
+          id,
+          // we are removing the half of the node width (75) to center the new node
+          position: project({
+            x: event.clientX - left - 75,
+            y: event.clientY - top,
+          }),
+          data: { label: `Node` },
+        };
+        if (connectingNodeId.current) {
+          const source = connectingNodeId.current;
+          setNodes((nds) => nds.concat(newNode));
+          setEdges((eds) =>
+            eds.concat({
+              id: getId(),
+              source,
+              target: id,
+            })
+          );
+        } else {
+          console.log("Error: keine connectionNodeId");
+        }
+      }
+    },
+    [project]
   );
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -73,7 +132,7 @@ export function Flow() {
           y: event.clientY - 0,
         };
       } else {
-        position = reactFlowInstance.project({
+        position = project({
           x: event.clientX - reactFlowBounds.left ?? 0,
           y: event.clientY - reactFlowBounds.top ?? 0,
         });
@@ -88,13 +147,13 @@ export function Flow() {
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [reactFlowInstance]
+    [project]
   );
 
   return (
     <>
       <Sidebar />
-      <div className="h-full flex-grow" ref={reactFlowWrapper}>
+      <div className="h-full flex-grow bg-white" ref={reactFlowWrapper}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -103,7 +162,10 @@ export function Flow() {
           onConnect={onConnect}
           onDrop={onDrop}
           onDragOver={onDragOver}
+          onConnectStart={onConnectStart}
+          onConnectEnd={onConnectEnd}
           fitView
+          fitViewOptions={fitViewOptions}
         >
           <MiniMap zoomable pannable />
           <Controls>

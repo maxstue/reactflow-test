@@ -14,3 +14,44 @@
   margin: 0 auto;
   @apply h-screen;
 }
+.react-flow .react-flow__handle {
+  width: 50px;
+  height: 13px;
+  border-radius: 3px;
+  @apply bg-blue-500;
+}
+
+.react-flow .react-flow__handle-top {
+  top: -8px;
+}
+
+.react-flow .react-flow__handle-bottom {
+  bottom: -8px;
+}
+
+.react-flow .react-flow__node {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  font-weight: 700;
+}
+
+.react-flow__node-input.selected {
+  @apply !border-2 !border-gray-600 !shadow !shadow-gray-600;
+}
+.react-flow__node-default.selected {
+  @apply !border-2 !border-gray-400 !shadow !shadow-gray-400;
+}
+.react-flow__node-output.selected {
+  @apply !border-2 !border-green-400 !shadow !shadow-green-400;
+}
+
+.react-flow .react-flow__edge path,
+.react-flow__connectionline path {
+  stroke-width: 2;
+  top: 20px;
+}
+
+.react-flow__nodesselection {
+  @apply !bg-red-500;
+}

@@ -24,7 +24,7 @@ export default () => {
             onDragStart={(event) => onDragStart(event, "input")}
             draggable
           >
-            Input Node
+            Start Node
           </div>
         </div>
 
