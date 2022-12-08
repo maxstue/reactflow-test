@@ -77,6 +77,7 @@ export function Flow() {
       const targetIsPane = (event.target as Element)?.classList.contains(
         "react-flow__pane"
       );
+      // anstatt direkt neue node zu erstellen kann man hier dann Modal oder popup öffnen und notwendige daten durchreichen
 
       if (targetIsPane && reactFlowWrapper.current) {
         // we need to remove the wrapper bounds, in order to get the correct position
@@ -138,6 +139,7 @@ export function Flow() {
         });
       }
 
+      // TODO anhand des types den deutschen text herausfinden. zB type: input = start
       const newNode = {
         id: getId(),
         type: flowTypeToApptype[type],
@@ -150,6 +152,12 @@ export function Flow() {
     [project]
   );
 
+  // TODO make custom 2 btn toggle snapgrid https://reactflow.dev/docs/examples/nodes/custom-node/
+  // TODO minimap show colors https://reactflow.dev/docs/examples/nodes/custom-node/
+  // TODO add save and restore and reset
+  // TODO workflowbuilder
+  // TODO horizontal /vertical flow toggle
+  // TODO add validation
   return (
     <>
       <Sidebar />

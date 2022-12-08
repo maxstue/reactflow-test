@@ -71,6 +71,20 @@ export default () => {
               "Strg" ("command") + linke Maustaste
             </span>
           </div>
+          <div className="flex flex-col">
+            Linie ziehen:
+            <span className="text-sm text-gray-600">
+              Klick auf blauen kasten und ziehen(strich nun sichtbar) und dann
+              maustaste loslassen erstellt neue Frage
+            </span>
+          </div>
+          <div className="flex flex-col">
+            Verbinden:
+            <span className="text-sm text-gray-600">
+              Man kann 2 Nodes auch verbinden in dem man bei beiden auf
+              einenblauen kasten klickt (eingehenden + ausgehenden Kasten)
+            </span>
+          </div>
         </div>
       </div>
     </aside>

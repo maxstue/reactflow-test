@@ -51,7 +51,3 @@
   stroke-width: 2;
   top: 20px;
 }
-
-.react-flow__nodesselection {
-  @apply !bg-red-500;
-}
