@@ -11,6 +11,7 @@ import ReactFlow, {
   Background,
   Panel,
   useReactFlow,
+  XYPosition,
 } from "reactflow";
 import { WorkflowDataTypes } from "./constants";
 import Sidebar from "./Sidebar";
@@ -65,11 +66,18 @@ export function Flow() {
       if (typeof type === "undefined" || !type) {
         return;
       }
-
-      const position = reactFlowInstance.project({
-        x: event.clientX - reactFlowBounds?.left ?? 0,
-        y: event.clientY - reactFlowBounds?.top ?? 0,
-      });
+      let position: XYPosition;
+      if (!reactFlowBounds) {
+        position = {
+          x: event.clientX - 0,
+          y: event.clientY - 0,
+        };
+      } else {
+        position = reactFlowInstance.project({
+          x: event.clientX - reactFlowBounds.left ?? 0,
+          y: event.clientY - reactFlowBounds.top ?? 0,
+        });
+      }
 
       const newNode = {
         id: getId(),
