@@ -10,7 +10,7 @@ export default function SnapGridButton({
   };
 
   return (
-    <button className="p-2 bg-gray-400" onClick={onClick}>
+    <button className="p-2 bg-gray-300 hover:bg-gray-400" onClick={onClick}>
       SnapGrid
     </button>
   );

@@ -48,6 +48,15 @@
 .react-flow__node-question.selected {
   @apply !border-2 !border-red-400 !shadow !shadow-red-600;
 }
+.react-flow__node-answer.selected {
+  @apply !border-2 !border-gray-400 !shadow !shadow-gray-600;
+}
+.react-flow__node-question.selected {
+  @apply !border-2 !border-gray-400 !shadow !shadow-gray-600;
+}
+.react-flow__node-solution.selected {
+  @apply !border-2 !border-green-400 !shadow !shadow-green-600;
+}
 
 .react-flow .react-flow__edge path,
 .react-flow__connectionline path {

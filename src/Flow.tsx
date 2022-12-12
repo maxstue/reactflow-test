@@ -33,7 +33,7 @@ const initialNodes: Node[] = [
   {
     id: getId(),
     type: "input",
-    position: { x: 100, y: 10 },
+    position: { x: 0, y: 0 },
     data: { label: "Start" },
   },
 ];
@@ -67,12 +67,11 @@ export function Flow() {
   >(undefined);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const { project } = useReactFlow();
+  const { project, setViewport, toObject } = useReactFlow();
 
   const handleEditNode = useCallback(() => {
     if (editModal) {
       const { id, label } = editModal;
-      console.log(id, label);
       setNodes((nds) =>
         nds.map((node) => {
           if (node.id !== id) {
@@ -212,7 +211,34 @@ export function Flow() {
     console.log("click");
   };
 
-  // TODO add save and restore and reset
+  const onSave = useCallback(() => {
+    const flow = toObject();
+    localStorage.setItem("flowchart", JSON.stringify(flow));
+  }, [toObject]);
+
+  const onRestore = useCallback(async () => {
+    const localStore = localStorage.getItem("flowchart");
+    if (localStore) {
+      const flow = JSON.parse(localStore);
+
+      if (flow) {
+        const { x = 0, y = 0, zoom = 1 } = flow.viewport;
+        setNodes(flow.nodes || []);
+        setEdges(flow.edges || []);
+        setViewport({ x, y, zoom });
+      }
+    } else {
+      console.log("Es befindet sich nichts im localstorage");
+    }
+  }, [setNodes, setViewport]);
+
+  const onReset = useCallback(async () => {
+    localStorage.removeItem("flowchart");
+    setNodes(initialNodes);
+    setEdges(initialEdges);
+    setViewport({ x: 250, y: 250, zoom: 1 });
+  }, [setNodes, setEdges, setViewport]);
+
   // TODO workflowbuilder
   // TODO horizontal /vertical flow toggle https://reactflow.dev/docs/examples/layout/dagre/
   // TODO add validation
@@ -252,19 +278,25 @@ export function Flow() {
             nodeStrokeColor={(n) => {
               if (n.type === "input") return "#475569";
               if (n.type === "default") return "#94a3b8";
+              if (n.type === "answer") return "#94a3b8";
+              if (n.type === "question") return "#94a3b8";
+              if (n.type === "solution") return "#94a3b8";
               if (n.type === "output") return "#4ade80";
               return "";
             }}
             nodeColor={(n) => {
               if (n.type === "input") return "#475569";
               if (n.type === "default") return "#94a3b8";
+              if (n.type === "answer") return "#94a3b8";
+              if (n.type === "question") return "#94a3b8";
+              if (n.type === "solution") return "#4ade80";
               if (n.type === "output") return "#4ade80";
               return "";
             }}
             onNodeClick={onMiniMapNodeClick}
           />
           <Controls>
-            <ControlButton onClick={() => console.log("action")}>
+            <ControlButton onClick={onSave}>
               <div>1</div>
             </ControlButton>
           </Controls>
@@ -274,10 +306,18 @@ export function Flow() {
               <SnapGridButton setSnapGrid={setSnapGrid} />
             </div>
           </Panel>
-          <Panel position="top-center">top-center</Panel>
-          <Panel position="top-right">top-right</Panel>
+          <Panel position="top-center">
+            <div className=" border bg-gray-300 p-4 hover:bg-gray-400">
+              <button onClick={onRestore}>Restore</button>
+            </div>
+          </Panel>
+          <Panel position="top-right">
+            {" "}
+            <div className="border bg-gray-300 p-4 hover:bg-gray-400">
+              <button onClick={onReset}>Reset</button>
+            </div>
+          </Panel>
           <Panel position="bottom-center">bottom-center</Panel>
-          <Panel position="bottom-right">bottom-right</Panel>
         </ReactFlow>
       </div>
     </>
