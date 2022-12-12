@@ -70,6 +70,9 @@ export default () => {
             <span className="text-sm text-gray-600">
               "Strg" ("command") + linke Maustaste
             </span>
+            <span className="text-sm text-gray-600">
+              "Shift" + linke Maustaste + ziehen = blauer Kasten
+            </span>
           </div>
           <div className="flex flex-col">
             Linie ziehen:
