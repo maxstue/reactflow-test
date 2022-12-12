@@ -17,11 +17,15 @@ import ReactFlow, {
   FitViewOptions,
   Node,
   useStore,
+  Position,
 } from "reactflow";
+import AnswerNode from "./AnswerNode";
 import { WorkflowDataTypes } from "./constants";
+import { EditModal } from "./EditModal";
 import QuestionNode from "./QuestionNode";
 import Sidebar from "./Sidebar";
 import SnapGridButton from "./SnapGridButton";
+import SolutionNode from "./SolutionNode";
 
 const getId = () => `dndnode_${nanoid()}`;
 
@@ -39,9 +43,9 @@ const initialEdges: Edge[] = [];
 const flowTypeToApptype: Record<WorkflowDataTypes, string> = {
   input: "input",
   question: "question",
-  antwort: "default",
+  answer: "answer",
   link: "output",
-  lösung: "output",
+  solution: "solution",
 };
 
 const fitViewOptions: FitViewOptions = {
@@ -50,15 +54,43 @@ const fitViewOptions: FitViewOptions = {
 
 const customNodeTypes = {
   question: QuestionNode,
+  answer: AnswerNode,
+  solution: SolutionNode,
 };
 
 export function Flow() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const connectingNodeId = useRef<string | null>(null);
   const [snapGrid, setSnapGrid] = useState(false);
+  const [editModal, setEditModal] = useState<
+    { id: string; label: string } | undefined
+  >(undefined);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { project } = useReactFlow();
+
+  const handleEditNode = useCallback(() => {
+    if (editModal) {
+      const { id, label } = editModal;
+      console.log(id, label);
+      setNodes((nds) =>
+        nds.map((node) => {
+          if (node.id !== id) {
+            return node;
+          }
+
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              label: `${label.split("_")[0]}_${nanoid(4)}`,
+            },
+          };
+        })
+      );
+    }
+    setEditModal(undefined);
+  }, [nodes, editModal]);
 
   const onConnect = useCallback(
     (params: Edge | Connection) => setEdges((els) => addEdge(params, els)),
@@ -83,17 +115,33 @@ export function Flow() {
       // anstatt direkt neue node zu erstellen kann man hier dann Modal oder popup öffnen und notwendige daten durchreichen
 
       if (targetIsPane && reactFlowWrapper.current) {
+        const sourceNode = nodes.find((x) => x.id === connectingNodeId.current);
+        let newType = "default";
+
+        if (sourceNode) {
+          const sourceType = sourceNode.type as WorkflowDataTypes;
+          if (sourceType === "question") {
+            newType = "answer";
+          } else {
+            newType = "question";
+          }
+        }
         // we need to remove the wrapper bounds, in order to get the correct position
         const { top, left } = reactFlowWrapper.current.getBoundingClientRect();
         const id = getId();
         const newNode = {
           id,
+          type: newType,
           // we are removing the half of the node width (75) to center the new node
           position: project({
             x: event.clientX - left - 75,
             y: event.clientY - top,
           }),
-          data: { label: `Node` },
+          data: {
+            label: `${newType} node`,
+            toolbarPosition: Position.Top,
+            openModal: setEditModal,
+          },
         };
         if (connectingNodeId.current) {
           const source = connectingNodeId.current;
@@ -110,7 +158,7 @@ export function Flow() {
         }
       }
     },
-    [project]
+    [project, nodes]
   );
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -147,7 +195,11 @@ export function Flow() {
         id: getId(),
         type: flowTypeToApptype[type],
         position,
-        data: { label: `${type} node` },
+        data: {
+          label: `${type} node`,
+          toolbarPosition: Position.Top,
+          openModal: setEditModal,
+        },
       };
 
       setNodes((nds) => nds.concat(newNode));
@@ -162,12 +214,23 @@ export function Flow() {
 
   // TODO add save and restore and reset
   // TODO workflowbuilder
-  // TODO horizontal /vertical flow toggle
+  // TODO horizontal /vertical flow toggle https://reactflow.dev/docs/examples/layout/dagre/
   // TODO add validation
   return (
     <>
       <Sidebar />
-      <div className="h-full flex-grow bg-white" ref={reactFlowWrapper}>
+      <div
+        className="realative h-full flex-grow bg-white"
+        ref={reactFlowWrapper}
+      >
+        {editModal && (
+          <EditModal
+            isOpen={!!editModal}
+            data={editModal}
+            close={() => setEditModal(undefined)}
+            onSave={handleEditNode}
+          />
+        )}
         <ReactFlow
           nodes={nodes}
           edges={edges}

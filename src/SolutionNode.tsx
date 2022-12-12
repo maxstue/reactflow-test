@@ -9,11 +9,10 @@ interface Props
     openModal: (data: any) => void;
   }> {}
 
-function QuestionNode({ data, id, isConnectable }: Props) {
+function SolutionNode({ data, id, isConnectable }: Props) {
   const handleBtnClick = () => {
     console.log("toolbar click", id);
   };
-
   return (
     <>
       <NodeToolbar
@@ -34,21 +33,15 @@ function QuestionNode({ data, id, isConnectable }: Props) {
           edit
         </button>
       </NodeToolbar>
-      <div>Frage: {data.label}</div>
       <Handle
         type="target"
         position={Position.Top}
         onConnect={(params) => console.log("handle onConnect", params)}
         isConnectable={isConnectable}
       />
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        id="a"
-        isConnectable={isConnectable}
-      />
+      <div>Lösung: {data.label}</div>
     </>
   );
 }
 
-export default memo(QuestionNode);
+export default memo(SolutionNode);

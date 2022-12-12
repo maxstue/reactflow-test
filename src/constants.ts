@@ -1,6 +1,6 @@
 export type WorkflowDataTypes =
   | "input"
-  | "antwort"
+  | "answer"
   | "question"
-  | "lösung"
+  | "solution"
   | "link";

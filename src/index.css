@@ -55,7 +55,9 @@
   top: 20px;
 }
 /* Default reactflow node styling */
-.react-flow__node-question {
+.react-flow__node-question,
+.react-flow__node-answer,
+.react-flow__node-solution {
   padding: 10px;
   border-radius: 3px;
   width: 150px;

@@ -32,7 +32,7 @@ export default () => {
           <h1 className="text-lg text-gray-500">Normal</h1>
           <div
             className="flex border border-gray-400 cursor-grab justify-center items-center p-2 rounded"
-            onDragStart={(event) => onDragStart(event, "antwort")}
+            onDragStart={(event) => onDragStart(event, "answer")}
             draggable
           >
             Antwort Node
@@ -49,7 +49,7 @@ export default () => {
           <h1 className="text-lg text-gray-500">Ausgang</h1>
           <div
             className="flex border border-green-400 cursor-grab justify-center items-center p-2 rounded"
-            onDragStart={(event) => onDragStart(event, "lösung")}
+            onDragStart={(event) => onDragStart(event, "solution")}
             draggable
           >
             Lösung Node
